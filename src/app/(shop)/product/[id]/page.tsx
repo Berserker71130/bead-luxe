@@ -18,7 +18,7 @@ import RelatedProducts from "@/components/shop/RelatedProducts";
 // Generate Static Params for SEO & Speed
 export async function generateStaticParams() {
   return products.map((product) => ({
-    id: product.id,
+    id: String(product.id),
   }));
 }
 
@@ -28,10 +28,10 @@ export default async function ProductPage(props: {
   const params = await props.params;
   const id = params.id;
 
-  const product = products.find((p) => p.id === id);
+  const product = products.find((p) => String(p.id) === String(id));
 
   if (!product) {
-    console.log("Product not found in data array");
+    console.log(`Product with ID ${id} not found in data array`);
     notFound();
   }
 
