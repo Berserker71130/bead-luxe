@@ -2,6 +2,7 @@
 
 import { Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useToastStore } from "@/store/toastStore";
 
 // DUMMY_DATA
 const INITIAL_CATEGORIES = [
@@ -29,6 +30,7 @@ const INITIAL_CATEGORIES = [
 ];
 
 export default function CategoriesPage() {
+  const addToast = useToastStore((state) => state.addToast);
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -48,7 +50,6 @@ export default function CategoriesPage() {
       .replace(/[^\w-]+/g, "");
     setFormData((prev) => ({ ...prev, slug }));
   }, [formData.name]);
-
   const handleSave = () => {
     if (editingId) {
       setCategories(
@@ -56,8 +57,16 @@ export default function CategoriesPage() {
           cat.id === editingId ? { ...cat, ...formData } : cat,
         ),
       );
+      // Trigger Update Toast
+      addToast(
+        "Category Updated",
+        "success",
+        `${formData.name} has been modified.`,
+      );
     } else {
       setCategories([...categories, { ...formData, id: Date.now(), count: 0 }]);
+      // Trigger create Toast
+      addToast("Category Created", "success", `${formData.name} is now live`);
     }
     closeModal();
   };
@@ -69,8 +78,15 @@ export default function CategoriesPage() {
   };
 
   const deleteCategory = (id: number) => {
+    const categoryToDelete = categories.find((c) => c.id === id);
     if (confirm("Are you sure you want to delete this category?")) {
       setCategories(categories.filter((c) => c.id !== id));
+      // Trigger delete toast
+      addToast(
+        "Category Removed",
+        "error",
+        `${categoryToDelete?.name} was deleted.`,
+      );
     }
   };
 

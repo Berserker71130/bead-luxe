@@ -6,6 +6,7 @@ import { Product } from "@/lib/data/products";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import Link from "next/link";
+import { useToastStore } from "@/store/toastStore";
 
 interface ProductCardProps {
   product: Product;
@@ -13,13 +14,24 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const addToast = useToastStore((state) => state.addToast);
 
   // Connect to Wishlist Store
   const { addItem: addToWish, removeItem, items } = useWishlistStore();
   const isWishlisted = items.some((i) => i.id === product.id);
 
   const toggleWishlist = () => {
-    isWishlisted ? removeItem(product.id) : addToWish(product);
+    if (isWishlisted) {
+      removeItem(product.id);
+      addToast(
+        "Removed from Wishlist",
+        "info",
+        `${product.name} has been removed.`,
+      );
+    } else {
+      addToWish(product);
+      addToast("Added to Wishlist", "info", `${product.name} saved for later.`);
+    }
   };
 
   return (
@@ -52,7 +64,14 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Quick Add Button (Hover) */}
         <button
-          onClick={() => addItem(product)}
+          onClick={() => {
+            addItem(product);
+            addToast(
+              "Added to Cart",
+              "success",
+              `${product.name} is now in your cart.`,
+            );
+          }}
           className="absolute bottom-4 left-4 right-4 bg-[#FDFBF7] text-[#0A0A0A] py-2.5 rounded-lg font-semibold translate-y-12 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-[#C9A84C] hover:text-white"
         >
           Quick Add

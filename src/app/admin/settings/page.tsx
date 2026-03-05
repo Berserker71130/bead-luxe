@@ -1,5 +1,6 @@
 "use client";
 
+import { useToastStore } from "@/store/toastStore";
 import {
   Bell,
   Check,
@@ -15,16 +16,20 @@ import { useState } from "react";
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("General");
   const [isSaving, setIsSaving] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const addToast = useToastStore((state) => state.addToast);
 
   const handleSave = () => {
     setIsSaving(true);
-    // Simulate API call
     setTimeout(() => {
       setIsSaving(false);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+
+      // TRIGGER GLOBAL TOAST
+      addToast(
+        "Settings Saved",
+        "success",
+        "Store preferences have been successfully updated.",
+      );
     }, 1000);
   };
 
@@ -211,13 +216,6 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
-
-      {/* Success Toast */}
-      {showToast && (
-        <div className="fixed bottom-10 right-10 bg-green-500 text-black px-6 py-4 rounded-2xl font-bold flex items-center gap-3 animate-bounce shadow-2xl">
-          <Check size={20} /> Settings Saved Successfully!
-        </div>
-      )}
     </div>
   );
 }

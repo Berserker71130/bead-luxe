@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useToastStore } from "@/store/toastStore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const addToast = useToastStore((state) => state.addToast);
 
   // const handleLogin = async (e: React.FormEvent) => {
   //   e.preventDefault();
@@ -78,9 +80,19 @@ export default function LoginPage() {
             };
 
         login(userData);
+
         router.push("/account");
       } else {
-        setError("Invalid credentials. Please check your email and password");
+        const errorMsg =
+          "Invalid credentials. Please check your email and password";
+        setError(errorMsg);
+
+        // TRIGGER TOAST
+        addToast(
+          "Authentication Failed",
+          "error",
+          "Please check your details and try again.",
+        );
       }
       setIsLoading(false);
     }, 1500);
