@@ -7,6 +7,7 @@ import { ShoppingBag, Search, Heart, User, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWishlistStore } from "@/store/wishlistStore";
 import CartDrawer from "@/components/shop/CartDrawer"; // 1. Back to standard import
+import SearchModal from "@/components/shop/SearchModal";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -73,7 +74,12 @@ const Navbar = () => {
 
         {/* Action Icons */}
         <div className="flex items-center space-x-5 text-white">
-          <Search className="w-5 h-5 cursor-pointer hover:text-[#C9A84C] transition-colors" />
+          {/* Search Modal Trigger */}
+          <SearchModal>
+            <button className="outline-none">
+              <Search className="w-5 h-5 cursor-pointer hover:text-[#C9A84C] transition-colors" />
+            </button>
+          </SearchModal>
 
           {/* Wishlist - Guarded by hasMounted */}
           <Link href="/wishlist" className="relative">
