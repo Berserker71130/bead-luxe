@@ -7,6 +7,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import Link from "next/link";
 import { useToastStore } from "@/store/toastStore";
+import { motion } from "framer-motion";
 
 interface ProductCardProps {
   product: Product;
@@ -35,7 +36,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group relative flex flex-col bg-[#111111] border border-white/5 rounded-xl overflow-hidden transition-all duration-300 hover:border-[#C9A84C]/40">
+    <motion.div
+      whileHover={{ y: -8 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className="group relative flex flex-col bg-[#111111] border border-white/5 rounded-xl overflow-hidden transition-all duration-300 hover:border-[#C9A84C]/40 hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+    >
       <div className="relative aspect-square overflow-hidden bg-[#1A1A1A]">
         {/* Image & Actions */}
         <Link
@@ -101,6 +106,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
