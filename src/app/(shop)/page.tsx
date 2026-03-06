@@ -6,7 +6,7 @@ import NewArrivalsCarousel from "@/components/shop/NewArrivalsCarousel";
 
 export default function Home() {
   return (
-    <main>
+    <main className="relative overflow-x-hidden w-full">
       <Navbar />
       <HeroSection />
       <CategoryStrip />

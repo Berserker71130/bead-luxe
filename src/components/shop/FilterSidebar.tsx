@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as Slider from "@radix-ui/react-slider";
-import { ChevronDown, Filter, Star } from "lucide-react";
+import { ChevronDown, Filter, Star, X } from "lucide-react"; // ADDED: X for close
 import { useRouter, useSearchParams } from "next/navigation";
 
 const categories = [
@@ -19,30 +19,24 @@ export default function FilterSidebar() {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
-  // 1. Initialize state from the URL (or defaults)
-  // This ensures that if you refresh the page, the filters stay where they were
+  // 1. Initialize state from URL
   const [priceRange, setPriceRange] = useState([
     Number(searchParams.get("min")) || 0,
     Number(searchParams.get("max")) || 100000,
   ]);
 
-  // Track selected categories as an array
   const selectedCats = searchParams.get("category")?.split(",") || [];
 
-  // 2. The Master Sync Function
-  // This takes your current UI state and pushes it to the URL
+  // 2. Filter Sync Logic
   const applyFilters = (cats: string[], prices: number[]) => {
     const params = new URLSearchParams(searchParams.toString());
-
     if (cats.length > 0) {
       params.set("category", cats.join(",").toLowerCase());
     } else {
       params.delete("category");
     }
-
     params.set("min", prices[0].toString());
     params.set("max", prices[1].toString());
-
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
@@ -51,18 +45,17 @@ export default function FilterSidebar() {
     const next = selectedCats.includes(lowerCat)
       ? selectedCats.filter((c) => c !== lowerCat)
       : [...selectedCats, lowerCat];
-
     applyFilters(next, priceRange);
   };
 
   const handleClearAll = () => {
     setPriceRange([0, 100000]);
-    router.push("/products", { scroll: false }); // Resets everything
+    router.push("/shop", { scroll: false });
   };
 
+  // ADJUSTMENT: Encapsulated FilterContent to be used in both Desktop & Mobile
   const FilterContent = () => (
     <div className="space-y-8">
-      {/* Header & Clear All */}
       <div className="flex items-center justify-between">
         <h2 className="text-[#FDFBF7] font-bold text-xl uppercase tracking-wider">
           Filters
@@ -80,7 +73,7 @@ export default function FilterSidebar() {
         defaultValue={["category", "price"]}
         className="space-y-4"
       >
-        {/* 1. CATEGORY - Checkboxes */}
+        {/* Category Section */}
         <Accordion.Item
           value="category"
           className="border-b border-white/10 pb-4"
@@ -116,7 +109,7 @@ export default function FilterSidebar() {
           </Accordion.Content>
         </Accordion.Item>
 
-        {/* 2. PRICE RANGE - Radix Dual Slider */}
+        {/* Price Slider Section */}
         <Accordion.Item value="price" className="border-b border-white/10 pb-4">
           <Accordion.Header>
             <Accordion.Trigger className="flex w-full items-center justify-between text-[#FDFBF7] py-2 group">
@@ -133,8 +126,8 @@ export default function FilterSidebar() {
             <Slider.Root
               className="relative flex items-center select-none touch-none w-full h-5"
               value={priceRange}
-              onValueChange={setPriceRange} // Updates UI text immediately
-              onValueCommit={(val) => applyFilters(selectedCats, val)} // Updates URL only when you let go
+              onValueChange={setPriceRange}
+              onValueCommit={(val) => applyFilters(selectedCats, val)}
               max={100000}
               step={1000}
             >
@@ -151,7 +144,7 @@ export default function FilterSidebar() {
           </Accordion.Content>
         </Accordion.Item>
 
-        {/* 3. RATING - Visual only for now */}
+        {/* Rating Section */}
         <Accordion.Item
           value="rating"
           className="border-b border-white/10 pb-4"
@@ -191,7 +184,7 @@ export default function FilterSidebar() {
           </Accordion.Content>
         </Accordion.Item>
 
-        {/* 4. TAGS */}
+        {/* Tags Section */}
         <Accordion.Item value="tags" className="border-b border-white/10 pb-4">
           <Accordion.Header>
             <Accordion.Trigger className="flex w-full items-center justify-between text-[#FDFBF7] py-2 group">
@@ -221,34 +214,48 @@ export default function FilterSidebar() {
 
   return (
     <>
+      {/* ADDITION: Responsive Check - Floating button only visible on Mobile */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-50 bg-[#C9A84C] text-black p-4 rounded-full shadow-2xl flex items-center gap-2 font-bold"
+        className="lg:hidden fixed bottom-6 right-6 z-50 bg-[#C9A84C] text-black p-4 rounded-full shadow-2xl flex items-center gap-2 font-bold hover:scale-105 active:scale-95 transition-all"
       >
         <Filter size={20} />
-        <span>Filters</span>
+        <span className="text-xs uppercase tracking-widest">Filters</span>
       </button>
 
+      {/* MOBILE DRAWER: Full Responsive Implementation */}
       {isOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
+        <div className="fixed inset-0 z-[60] lg:hidden animate-in fade-in duration-300">
           <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/90 backdrop-blur-md"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-[#0A0A0A] rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto border-t border-white/10">
-            <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
-            <FilterContent />
+          <div className="absolute bottom-0 left-0 right-0 bg-[#0A0A0A] rounded-t-[2.5rem] p-8 max-h-[85vh] overflow-y-auto border-t border-[#C9A84C]/20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom duration-500">
+            {/* Handle Bar */}
+            <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" />
+
+            {/* Close Button Inside Drawer */}
             <button
               onClick={() => setIsOpen(false)}
-              className="w-full mt-8 bg-[#FDFBF7] text-black py-4 rounded-xl font-bold"
+              className="absolute top-8 right-8 text-white/20 hover:text-white"
             >
-              Show Results
+              <X size={24} />
+            </button>
+
+            <FilterContent />
+
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-full mt-10 bg-[#C9A84C] text-black py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-lg shadow-[#C9A84C]/10 active:scale-95 transition-all"
+            >
+              Apply & Show Results
             </button>
           </div>
         </div>
       )}
 
-      <aside className="hidden lg:block w-64 shrink-0 h-fit sticky top-28">
+      {/* DESKTOP SIDEBAR: Fixed and Responsive */}
+      <aside className="hidden lg:block w-72 shrink-0 h-fit sticky top-28 border-r border-white/5 pr-8">
         <FilterContent />
       </aside>
     </>

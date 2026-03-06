@@ -6,17 +6,34 @@ import {
   Box,
   Users,
   AlertTriangle,
-  TrendingUp,
-  MoreVertical,
+  X, // Added for UI
 } from "lucide-react";
 import StatsCard from "@/components/admin/StatsCard";
 import RevenueChart from "@/components/admin/RevenueChart";
 
 export default function AdminDashboard() {
+  const recentOrders = [
+    {
+      id: "#ORD-9921",
+      user: "Amara K.",
+      date: "Oct 12, 2023",
+      price: "₦15,000",
+      status: "Paid",
+    },
+    {
+      id: "#ORD-9922",
+      user: "Tunde O.",
+      date: "Oct 11, 2023",
+      price: "₦42,500",
+      status: "Processing",
+    },
+  ];
+
   return (
-    <div className="space-y-10 pb-10 max-w-[1600px] mx-auto">
-      {/* 1. KPI Header (Matches Criteria) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    // ADJUSTMENT: Added responsive padding (p-4 on mobile, p-10 on desktop)
+    <div className="p-4 md:p-10 space-y-10 max-w-[1600px] mx-auto overflow-x-hidden">
+      {/* 1. KPI Header - Grid adjusts columns based on screen size */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatsCard
           title="Total Revenue"
           value="₦2,450,000"
@@ -48,16 +65,15 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 2. Main Revenue Chart (Matches Criteria) */}
-        <div className="lg:col-span-2">
+        {/* 2. Main Revenue Chart */}
+        <div className="lg:col-span-2 w-full overflow-hidden">
           <RevenueChart />
         </div>
 
-        {/* 3. Orders by Category - NEW (Matches Criteria: Donut/Pie) */}
-        <div className="bg-[#111111] border border-white/5 p-8 rounded-[2.5rem]">
+        {/* 3. Orders by Category */}
+        <div className="bg-[#111111] border border-white/5 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem]">
           <h3 className="text-lg font-medium mb-6">Orders by Category</h3>
           <div className="flex justify-center items-center h-48 relative">
-            {/* Simple SVG Donut Chart for speed/perfection */}
             <svg className="w-40 h-40 transform -rotate-90">
               <circle
                 cx="80"
@@ -101,13 +117,17 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 4. Recent Orders Table - UPDATED (Added Date Column) */}
-        <div className="lg:col-span-2 bg-[#111111] border border-white/5 rounded-[2.5rem] overflow-hidden">
-          <div className="p-8 border-b border-white/5 flex justify-between items-center">
+        {/* 4. Recent Orders Section - RESPONSIVE FIX */}
+        <div className="lg:col-span-2 bg-[#111111] border border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden">
+          <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center">
             <h3 className="text-lg font-medium">Recent Activity</h3>
-            <button className="text-xs text-[#C9A84C]">View All</button>
+            <button className="text-xs text-[#C9A84C] hover:underline">
+              View All
+            </button>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Desktop Table View (Hidden on mobile) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-white/5 text-[10px] uppercase tracking-widest text-white/40">
                 <tr>
@@ -119,22 +139,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {[
-                  {
-                    id: "#ORD-9921",
-                    user: "Amara K.",
-                    date: "Oct 12, 2023",
-                    price: "₦15,000",
-                    status: "Paid",
-                  },
-                  {
-                    id: "#ORD-9922",
-                    user: "Tunde O.",
-                    date: "Oct 11, 2023",
-                    price: "₦42,500",
-                    status: "Processing",
-                  },
-                ].map((order) => (
+                {recentOrders.map((order) => (
                   <tr
                     key={order.id}
                     className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
@@ -157,11 +162,36 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card View (Visible < 768px) */}
+          <div className="md:hidden divide-y divide-white/5">
+            {recentOrders.map((order) => (
+              <div key={order.id} className="p-6 space-y-3">
+                <div className="flex justify-between items-start">
+                  <span className="font-mono text-[#C9A84C] text-sm">
+                    {order.id}
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${order.status === "Paid" ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"}`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white font-medium">{order.user}</span>
+                  <span className="text-white/80">{order.price}</span>
+                </div>
+                <p className="text-[10px] text-white/40 uppercase tracking-widest">
+                  {order.date}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* 5. Top Selling Products & Low Stock (Matches Criteria) */}
-        <div className="space-y-8">
-          <div className="bg-[#111111] border border-white/5 p-8 rounded-[2.5rem]">
+        {/* 5. Top Selling & Low Stock */}
+        <div className="space-y-8 pb-10">
+          <div className="bg-[#111111] border border-white/5 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem]">
             <h3 className="text-lg font-medium mb-6">Top Selling</h3>
             <div className="space-y-4">
               {[
@@ -181,17 +211,20 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-[#111111] border border-orange-500/10 p-8 rounded-[2.5rem]">
+          <div className="bg-[#111111] border border-orange-500/10 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem]">
             <div className="flex items-center gap-3 mb-6 text-orange-500">
               <AlertTriangle size={20} />
               <h3 className="text-lg font-medium">Low Stock</h3>
             </div>
-            <div className="space-y-4">
-              <p className="text-xs text-white/40">
-                The following items have stock &lt; 10
+            <div className="space-y-4 text-sm font-medium">
+              <p className="text-xs text-white/40 font-normal">
+                Items with stock &lt; 10
               </p>
-              <div className="text-sm font-medium">
-                Golden Crystal Bead (4 left)
+              <div className="flex justify-between items-center">
+                <span>Golden Crystal Bead</span>
+                <span className="text-orange-500 bg-orange-500/10 px-2 py-1 rounded text-xs">
+                  4 Left
+                </span>
               </div>
             </div>
           </div>
