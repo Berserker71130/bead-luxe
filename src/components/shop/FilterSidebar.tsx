@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as Slider from "@radix-ui/react-slider";
-import { ChevronDown, Filter, Star, X } from "lucide-react"; // ADDED: X for close
+import { ChevronDown, Filter, Star, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion"; // Added for smooth exit
 
 const categories = [
   "Beads",
@@ -53,7 +54,6 @@ export default function FilterSidebar() {
     router.push("/shop", { scroll: false });
   };
 
-  // ADJUSTMENT: Encapsulated FilterContent to be used in both Desktop & Mobile
   const FilterContent = () => (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -214,7 +214,6 @@ export default function FilterSidebar() {
 
   return (
     <>
-      {/* ADDITION: Responsive Check - Floating button only visible on Mobile */}
       <button
         onClick={() => setIsOpen(true)}
         className="lg:hidden fixed bottom-6 right-6 z-50 bg-[#C9A84C] text-black p-4 rounded-full shadow-2xl flex items-center gap-2 font-bold hover:scale-105 active:scale-95 transition-all"
@@ -223,38 +222,46 @@ export default function FilterSidebar() {
         <span className="text-xs uppercase tracking-widest">Filters</span>
       </button>
 
-      {/* MOBILE DRAWER: Full Responsive Implementation */}
-      {isOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden animate-in fade-in duration-300">
-          <div
-            className="absolute inset-0 bg-black/90 backdrop-blur-md"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-[#0A0A0A] rounded-t-[2.5rem] p-8 max-h-[85vh] overflow-y-auto border-t border-[#C9A84C]/20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom duration-500">
-            {/* Handle Bar */}
-            <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" />
-
-            {/* Close Button Inside Drawer */}
-            <button
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-[60] lg:hidden">
+            {/* Backdrop with motion */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
               onClick={() => setIsOpen(false)}
-              className="absolute top-8 right-8 text-white/20 hover:text-white"
+            />
+            {/* Drawer with motion */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute bottom-0 left-0 right-0 bg-[#0A0A0A] rounded-t-[2.5rem] p-8 max-h-[85vh] overflow-y-auto border-t border-[#C9A84C]/20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
             >
-              <X size={24} />
-            </button>
+              <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" />
+              <button
+                onClick={() => setIsOpen(false)}
+                className="absolute top-8 right-8 text-white/20 hover:text-white"
+              >
+                <X size={24} />
+              </button>
 
-            <FilterContent />
+              <FilterContent />
 
-            <button
-              onClick={() => setIsOpen(false)}
-              className="w-full mt-10 bg-[#C9A84C] text-black py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-lg shadow-[#C9A84C]/10 active:scale-95 transition-all"
-            >
-              Apply & Show Results
-            </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-full mt-10 bg-[#C9A84C] text-black py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-lg shadow-[#C9A84C]/10 active:scale-95 transition-all"
+              >
+                Apply & Show Results
+              </button>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
-      {/* DESKTOP SIDEBAR: Fixed and Responsive */}
       <aside className="hidden lg:block w-72 shrink-0 h-fit sticky top-28 border-r border-white/5 pr-8">
         <FilterContent />
       </aside>

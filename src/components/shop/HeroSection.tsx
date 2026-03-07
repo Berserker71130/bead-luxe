@@ -1,13 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { easeOut, motion } from "framer-motion";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
 const HeroSection = () => {
   return (
     <section className="relative flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#0A0A0A]">
-      {/* 1. BACKGROUND IMAGE & OVERLAY */}
+      {/* BACKGROUND IMAGE & OVERLAY */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
         style={{
@@ -16,30 +16,63 @@ const HeroSection = () => {
       />
       <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-black/20 to-black/60" />
 
-      {/* 2. CONTENT */}
+      {/* 2. STAGGERED CONTENT */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut" }}
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.4, delayChildren: 0.5 },
+          },
+        }}
         className="relative z-20 container flex flex-col items-center justify-center px-6 text-center"
       >
-        <span className="mb-4 block text-[10px] md:text-xs font-medium tracking-[0.4em] text-[#C9A84C] uppercase">
+        <motion.span
+          variants={{
+            hidden: { opacity: 0, y: 30 },
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: {
+                duration: 1.2,
+                ease: "easeOut",
+              },
+            },
+          }}
+          className="mb-4 block text-[10px] md:text-xs font-medium tracking-[0.4em] text-[#C9A84C] uppercase"
+        >
           Est. 2024 -- Artisan Crafted
-        </span>
+        </motion.span>
 
-        {/* ADJUSTMENT: Responsive Font Sizes 
-            Reduced from 5xl to 3xl on very small screens to prevent line-wrap overflow */}
-        <h1 className="mb-6 font-serif text-3xl sm:text-4xl md:text-7xl lg:text-8xl text-[#FDFBF7] leading-tight">
+        <motion.h1
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+          }}
+          className="mb-6 font-serif text-3xl sm:text-4xl md:text-7xl lg:text-8xl text-[#FDFBF7] leading-tight"
+        >
           Crafted For The Devoted
-        </h1>
+        </motion.h1>
 
-        {/* ADJUSTMENT: Paragraph Width & Size 
-            Added max-w-[280px] for small mobile to keep text contained */}
-        <p className="mx-auto mb-10 max-w-[280px] sm:max-w-lg text-[10px] md:text-sm tracking-widest text-[#FDFBF7]/80 uppercase md:text-base leading-relaxed">
+        <motion.p
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+          }}
+          className="mx-auto mb-10 max-w-[280px] sm:max-w-lg text-[10px] md:text-sm tracking-widest text-[#FDFBF7]/80 uppercase md:text-base leading-relaxed"
+        >
           Rare beads and premium jewelry supplies for the modern visionary.
-        </p>
+        </motion.p>
 
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row w-full sm:w-auto">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+          }}
+          className="flex flex-col items-center justify-center gap-4 sm:flex-row w-full sm:w-auto"
+        >
           <Link
             href="/shop"
             className="w-full sm:w-auto bg-[#C9A84C] px-10 py-4 text-[10px] md:text-xs font-bold tracking-widest text-black uppercase transition-all hover:bg-[#FDFBF7]"
@@ -53,10 +86,10 @@ const HeroSection = () => {
           >
             Our Story
           </Link>
-        </div>
+        </motion.div>
       </motion.div>
 
-      {/* 3. SCROLL INDICATOR ARROW */}
+      {/* 3. SCROLL INDICATOR */}
       <motion.div
         animate={{ y: [0, 10, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}

@@ -17,7 +17,9 @@ function GridSkeleton() {
           className="aspect-[3/4] bg-white/5 rounded-2xl relative overflow-hidden"
         >
           {/* This div creates the shimmer effect */}
-          <div className="absolute inset-0-translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 tp-transparent" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+          <div className="absolute bottom-4 left-4 right-4 h-4 bg-white/5 rounded-md" />
         </div>
       ))}
     </div>

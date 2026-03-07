@@ -1,15 +1,81 @@
 "use client";
 
+import React, { useState, useEffect, ReactNode } from "react";
 import {
   DollarSign,
   ShoppingBag,
   Box,
   Users,
   AlertTriangle,
-  X, // Added for UI
 } from "lucide-react";
-import StatsCard from "@/components/admin/StatsCard";
 import RevenueChart from "@/components/admin/RevenueChart";
+
+// 1. INTERNAL ANIMATION COMPONENT
+const AnimatedStat = ({ value }: { value: string }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  const numericTarget = parseInt(value.replace(/[^0-9]/g, "")) || 0;
+  const isCurrency = value.includes("₦");
+
+  useEffect(() => {
+    let start = 0;
+    const end = numericTarget;
+    const duration = 1500;
+    const increment = end / (duration / 16);
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        setDisplayValue(end);
+        clearInterval(timer);
+      } else {
+        setDisplayValue(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(timer);
+  }, [numericTarget]);
+
+  return (
+    <span>
+      {isCurrency ? "₦" : ""}
+      {displayValue.toLocaleString()}
+    </span>
+  );
+};
+
+// 2. INTERNAL STATS CARD (Merged with your styling)
+interface StatsCardProps {
+  title: string;
+  value: ReactNode; // Changed to ReactNode to accept the Animated component
+  icon: any;
+  trend: string;
+  isUp: boolean;
+}
+
+const LocalStatsCard = ({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  isUp,
+}: StatsCardProps) => (
+  <div className="bg-[#111111] border border-white/5 p-6 rounded-3xl transition-all hover:border-[#C9A84C]/20 group">
+    <div className="flex justify-between items-start mb-4">
+      <div className="p-3 bg-white/5 rounded-2xl text-[#C9A84C] group-hover:bg-[#C9A84C]/10 transition-colors">
+        <Icon size={24} />
+      </div>
+      <span
+        className={`text-xs font-medium px-2 py-1 rounded-lg ${isUp ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}`}
+      >
+        {isUp ? "↑" : "↓"} {trend}
+      </span>
+    </div>
+    <p className="text-white/40 text-xs uppercase tracking-widest mb-1">
+      {title}
+    </p>
+    <h3 className="text-2xl font-bold text-white">{value}</h3>
+  </div>
+);
 
 export default function AdminDashboard() {
   const recentOrders = [
@@ -30,48 +96,46 @@ export default function AdminDashboard() {
   ];
 
   return (
-    // ADJUSTMENT: Added responsive padding (p-4 on mobile, p-10 on desktop)
     <div className="p-4 md:p-10 space-y-10 max-w-[1600px] mx-auto overflow-x-hidden">
-      {/* 1. KPI Header - Grid adjusts columns based on screen size */}
+      {/* 1. KPI Header - Using the LocalStatsCard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <StatsCard
+        <LocalStatsCard
           title="Total Revenue"
-          value="₦2,450,000"
+          value={<AnimatedStat value="₦2,450,000" />}
           icon={DollarSign}
           trend="12%"
           isUp={true}
         />
-        <StatsCard
+        <LocalStatsCard
           title="Orders Today"
-          value="48"
+          value={<AnimatedStat value="48" />}
           icon={ShoppingBag}
           trend="5%"
           isUp={true}
         />
-        <StatsCard
+        <LocalStatsCard
           title="Total Products"
-          value="156"
+          value={<AnimatedStat value="156" />}
           icon={Box}
           trend="2%"
           isUp={false}
         />
-        <StatsCard
+        <LocalStatsCard
           title="Active Customers"
-          value="1,240"
+          value={<AnimatedStat value="1,240" />}
           icon={Users}
           trend="18%"
           isUp={true}
         />
       </div>
 
+      {/* 2. Charts & Other Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 2. Main Revenue Chart */}
         <div className="lg:col-span-2 w-full overflow-hidden">
           <RevenueChart />
         </div>
 
-        {/* 3. Orders by Category */}
-        <div className="bg-[#111111] border border-white/5 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem]">
+        <div className="bg-[#111111] border border-white/5 p-6 md:p-8 rounded-[2rem]">
           <h3 className="text-lg font-medium mb-6">Orders by Category</h3>
           <div className="flex justify-center items-center h-48 relative">
             <svg className="w-40 h-40 transform -rotate-90">
@@ -103,131 +167,62 @@ export default function AdminDashboard() {
               </span>
             </div>
           </div>
-          <div className="mt-6 space-y-2">
-            <div className="flex justify-between text-xs text-white/60">
-              <span>Waist Beads</span>
-              <span>75%</span>
-            </div>
-            <div className="flex justify-between text-xs text-white/20">
-              <span>Anklets</span>
-              <span>25%</span>
-            </div>
-          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 4. Recent Orders Section - RESPONSIVE FIX */}
-        <div className="lg:col-span-2 bg-[#111111] border border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden">
-          <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center">
-            <h3 className="text-lg font-medium">Recent Activity</h3>
-            <button className="text-xs text-[#C9A84C] hover:underline">
-              View All
-            </button>
-          </div>
-
-          {/* Desktop Table View (Hidden on mobile) */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-white/5 text-[10px] uppercase tracking-widest text-white/40">
-                <tr>
-                  <th className="px-8 py-4">Order #</th>
-                  <th className="px-8 py-4">Customer</th>
-                  <th className="px-8 py-4">Date</th>
-                  <th className="px-8 py-4">Amount</th>
-                  <th className="px-8 py-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {recentOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
-                  >
-                    <td className="px-8 py-6 font-mono text-[#C9A84C]">
-                      {order.id}
-                    </td>
-                    <td className="px-8 py-6">{order.user}</td>
-                    <td className="px-8 py-6 text-white/40">{order.date}</td>
-                    <td className="px-8 py-6">{order.price}</td>
-                    <td className="px-8 py-6">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${order.status === "Paid" ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"}`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Card View (Visible < 768px) */}
-          <div className="md:hidden divide-y divide-white/5">
-            {recentOrders.map((order) => (
-              <div key={order.id} className="p-6 space-y-3">
-                <div className="flex justify-between items-start">
-                  <span className="font-mono text-[#C9A84C] text-sm">
-                    {order.id}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${order.status === "Paid" ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"}`}
-                  >
-                    {order.status}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white font-medium">{order.user}</span>
-                  <span className="text-white/80">{order.price}</span>
-                </div>
-                <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                  {order.date}
-                </p>
-              </div>
-            ))}
-          </div>
+      {/* 3. Recent Activity Table */}
+      <div className="lg:col-span-2 bg-[#111111] border border-white/5 rounded-[2rem] overflow-hidden">
+        <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center">
+          <h3 className="text-lg font-medium">Recent Activity</h3>
         </div>
-
-        {/* 5. Top Selling & Low Stock */}
-        <div className="space-y-8 pb-10">
-          <div className="bg-[#111111] border border-white/5 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem]">
-            <h3 className="text-lg font-medium mb-6">Top Selling</h3>
-            <div className="space-y-4">
-              {[
-                { name: "Royal Gold Bead", sales: "1,200 units", img: "👑" },
-                { name: "Crystal Anklet", sales: "850 units", img: "✨" },
-              ].map((prod) => (
-                <div key={prod.name} className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center">
-                    {prod.img}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{prod.name}</p>
-                    <p className="text-[10px] text-white/40">{prod.sales}</p>
-                  </div>
-                </div>
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-white/5 text-[10px] uppercase tracking-widest text-white/40">
+              <tr>
+                <th className="px-8 py-4">Order #</th>
+                <th className="px-8 py-4">Customer</th>
+                <th className="px-8 py-4">Date</th>
+                <th className="px-8 py-4">Amount</th>
+                <th className="px-8 py-4">Status</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm">
+              {recentOrders.map((order) => (
+                <tr
+                  key={order.id}
+                  className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                >
+                  <td className="px-8 py-6 font-mono text-[#C9A84C]">
+                    {order.id}
+                  </td>
+                  <td className="px-8 py-6">{order.user}</td>
+                  <td className="px-8 py-6 text-white/40">{order.date}</td>
+                  <td className="px-8 py-6">{order.price}</td>
+                  <td className="px-8 py-6">
+                    <span
+                      className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${order.status === "Paid" ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"}`}
+                    >
+                      {order.status}
+                    </span>
+                  </td>
+                </tr>
               ))}
-            </div>
-          </div>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-          <div className="bg-[#111111] border border-orange-500/10 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem]">
-            <div className="flex items-center gap-3 mb-6 text-orange-500">
-              <AlertTriangle size={20} />
-              <h3 className="text-lg font-medium">Low Stock</h3>
-            </div>
-            <div className="space-y-4 text-sm font-medium">
-              <p className="text-xs text-white/40 font-normal">
-                Items with stock &lt; 10
-              </p>
-              <div className="flex justify-between items-center">
-                <span>Golden Crystal Bead</span>
-                <span className="text-orange-500 bg-orange-500/10 px-2 py-1 rounded text-xs">
-                  4 Left
-                </span>
-              </div>
-            </div>
-          </div>
+      {/* 4. Bottom Section: Low Stock */}
+      <div className="bg-[#111111] border border-orange-500/10 p-6 md:p-8 rounded-[2rem]">
+        <div className="flex items-center gap-3 mb-6 text-orange-500">
+          <AlertTriangle size={20} />
+          <h3 className="text-lg font-medium">Low Stock</h3>
+        </div>
+        <div className="flex justify-between items-center text-sm font-medium">
+          <span>Golden Crystal Bead</span>
+          <span className="text-orange-500 bg-orange-500/10 px-2 py-1 rounded text-xs">
+            4 Left
+          </span>
         </div>
       </div>
     </div>
