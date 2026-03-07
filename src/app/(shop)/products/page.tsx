@@ -5,10 +5,26 @@ import FilterSidebar from "@/components/shop/FilterSidebar";
 import FilterChips from "@/components/shop/FilterChips";
 import ProductGrid from "@/components/shop/ProductGrid";
 import Pagination from "@/components/shop/Pagination";
+import { Suspense } from "react";
 
-export default async function ProductPage({
-  searchParams,
-}: {
+// 1. This is a small internal loading component so we don't need a separate file
+function GridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-pulse">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="aspect-[3/4] bg-white/5 rounded-2xl relative overflow-hidden"
+        >
+          {/* This div creates the shimmer effect */}
+          <div className="absolute inset-0-translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 tp-transparent" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default async function ProductPage(props: {
   searchParams: Promise<{
     category?: string;
     sort?: string;
@@ -17,19 +33,18 @@ export default async function ProductPage({
     page?: string;
   }>;
 }) {
-  const params = await searchParams;
+  const params = await props.searchParams;
   const categoryParam = params.category;
   const sort = params.sort;
   const minPrice = Number(params.min) || 0;
   const maxPrice = Number(params.max) || 1000000;
 
-  // 1. PAGINATION SETUP
   const ITEMS_PER_PAGE = 12;
   const currentPage = Number(params.page) || 1;
 
   let filteredProducts = [...products];
 
-  // 2. FILTERING LOGIC
+  // FILTERING
   if (categoryParam) {
     const selectedCategories = categoryParam.split(",");
     filteredProducts = filteredProducts.filter((p) =>
@@ -41,14 +56,13 @@ export default async function ProductPage({
     (p) => p.price >= minPrice && p.price <= maxPrice,
   );
 
-  // 3. SORTING LOGIC
+  // SORTING
   if (sort === "price-asc") {
     filteredProducts.sort((a, b) => a.price - b.price);
   } else if (sort === "price-desc") {
     filteredProducts.sort((a, b) => b.price - a.price);
   }
 
-  // 4. PAGINATION MATH (The Slicing)
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -76,12 +90,10 @@ export default async function ProductPage({
         </div>
 
         <div className="flex flex-col md:flex-row gap-12">
-          {/* Sidebar */}
           <aside className="w-full md:w-64 shrink-0">
             <FilterSidebar />
           </aside>
 
-          {/* Main Content Area */}
           <div className="flex-1">
             <FilterChips
               categoryParam={categoryParam}
@@ -89,22 +101,24 @@ export default async function ProductPage({
               maxPrice={maxPrice}
             />
 
-            {filteredProducts.length > 0 ? (
-              <>
-                {/* Grid & List View Toggle Component */}
-                <ProductGrid products={paginatedProducts} />
-
-                {/* Pagination Controls */}
-                <Pagination totalPages={totalPages} currentPage={currentPage} />
-              </>
-            ) : (
-              /* Empty State */
-              <div className="text-center py-32 border border-dashed border-white/10 rounded-3xl">
-                <p className="text-white/30 italic">
-                  No products match your current filters.
-                </p>
-              </div>
-            )}
+            {/* KEY FIX: We use Suspense with a key to force re-render on navigation */}
+            <Suspense key={JSON.stringify(params)} fallback={<GridSkeleton />}>
+              {filteredProducts.length > 0 ? (
+                <>
+                  <ProductGrid products={paginatedProducts} />
+                  <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                  />
+                </>
+              ) : (
+                <div className="text-center py-32 border border-dashed border-white/10 rounded-3xl">
+                  <p className="text-white/30 italic">
+                    No products match your current filters.
+                  </p>
+                </div>
+              )}
+            </Suspense>
           </div>
         </div>
       </div>

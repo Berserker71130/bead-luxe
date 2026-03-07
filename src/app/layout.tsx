@@ -5,6 +5,7 @@ import "./globals.css";
 import Footer from "@/components/shop/Footer";
 import Marquee from "@/components/shop/Marquee";
 import { ToastProvider } from "@/components/ui/Toast";
+import PageTransition from "@/components/ui/PageTransition";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,7 +33,9 @@ export default function RootLayout({
       <body className={`${inter.variable} ${cormorant.variable} antialiased`}>
         <ToastProvider>
           <Navbar />
-          <main>{children}</main>
+          <main>
+            <PageTransition>{children}</PageTransition>
+          </main>
           <Marquee />
           <Footer />
         </ToastProvider>

@@ -3,6 +3,7 @@
 import { useWishlistStore } from "@/store/wishlistStore";
 import ProductCard from "@/components/shop/ProductCard";
 import Link from "next/link";
+import PageTransition from "@/components/ui/PageTransition";
 
 export default function WishlistPage() {
   const { items } = useWishlistStore();

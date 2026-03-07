@@ -178,7 +178,7 @@ export default function FilterSidebar() {
                     <Star key={i} size={12} className="text-white/10" />
                   ))}
                 </div>
-                <span>& Up</span>
+                <span>⬆</span>
               </button>
             ))}
           </Accordion.Content>
