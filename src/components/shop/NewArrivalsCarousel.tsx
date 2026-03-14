@@ -1,21 +1,20 @@
 "use client";
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, Autoplay } from "swiper/modules"; // 1. Added Autoplay module
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import { products } from "@/lib/data/products";
 import "swiper/css";
 import "swiper/css/navigation";
+import "swiper/css/autoplay"; // 2. Added autoplay css
 
 export default function NewArrivalsCarousel() {
   const newArrivals = products.filter((product) => product.isNewArrival);
 
   return (
-    // ADJUSTMENT: Added 'w-full' and 'relative' to ensure containment
     <section className="py-12 md:py-20 bg-[#0A0A0A] overflow-hidden w-full relative">
       <div className="max-w-7xl mx-auto px-6 relative">
-        {/* Header Section: Adjusted for mobile spacing */}
         <div className="flex justify-between items-end mb-8 md:mb-10">
           <div>
             <h3 className="text-[#C9A84C] uppercase tracking-[0.3em] text-[10px] md:text-xs font-semibold mb-2">
@@ -26,7 +25,6 @@ export default function NewArrivalsCarousel() {
             </h2>
           </div>
 
-          {/* Custom Navigation Arrows: Hidden on smallest mobile for cleaner UI */}
           <div className="hidden sm:flex gap-4">
             <button className="swiper-prev-btn p-2 border border-[#C9A84C]/30 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] transition-all rounded-full outline-none">
               <ChevronLeft size={20} />
@@ -37,21 +35,26 @@ export default function NewArrivalsCarousel() {
           </div>
         </div>
 
-        {/* Swiper Container: Optimized breakpoints */}
         <Swiper
-          modules={[Navigation]}
+          modules={[Navigation, Autoplay]} // 3. Added Autoplay to modules
           navigation={{
             prevEl: ".swiper-prev-btn",
             nextEl: ".swiper-next-btn",
           }}
-          spaceBetween={16} // Reduced gap for mobile
-          slidesPerView={1.2} // Original 1.2 is perfect for mobile "hinting"
-          breakpoints={{
-            480: { slidesPerView: 1.5, spaceBetween: 20 },
-            640: { slidesPerView: 2.2, spaceBetween: 24 },
-            1024: { slidesPerView: 4, spaceBetween: 24 },
+          // 4. Autoplay Logic
+          autoplay={{
+            delay: 3000, // Moves every 3 seconds
+            disableOnInteraction: false, // Restart autoplay after user interaction
+            pauseOnMouseEnter: true, // IMPORTANT: Stops when Bianca hovers over a card
           }}
-          // ADJUSTMENT: Overflow visible is fine as long as the Section parent is overflow-hidden
+          loop={true} // Makes it an infinite scroll
+          spaceBetween={16}
+          slidesPerView={1.2}
+          breakpoints={{
+            480: { slidesPerView: 2, spaceBetween: 20 }, // Adjusted to match "smaller cards" vibe
+            640: { slidesPerView: 3, spaceBetween: 24 },
+            1024: { slidesPerView: 5, spaceBetween: 24 }, // Show more on desktop since they are smaller
+          }}
           className="!overflow-visible"
         >
           {newArrivals.map((product) => (

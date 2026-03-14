@@ -14,14 +14,14 @@ export default function ProductGrid({ products }: { products: any[] }) {
           onClick={() => setView("grid")}
           className={`flex items-center gap-2 text-[10px] uppercase tracking-widest transition-colors ${view === "grid" ? "text-[#C9A84C]" : "text-white/40"}`}
         >
-          <LayoutGrid size={16} /> Grid
+          <LayoutGrid size={14} /> Grid
         </button>
 
         <button
           onClick={() => setView("list")}
           className={`flex items-center gap-2 text-[10px] uppercase tracking-widest transition-colors ${view === "list" ? "text-[#C9A84C]" : "text-white/40"}`}
         >
-          <List size={16} /> List
+          <List size={14} /> List
         </button>
       </div>
 
@@ -29,7 +29,7 @@ export default function ProductGrid({ products }: { products: any[] }) {
       <div
         className={
           view === "grid"
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12"
+            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8 md:gap-x-6 md:gap-y-10"
             : "flex flex-col gap-8"
         }
       >

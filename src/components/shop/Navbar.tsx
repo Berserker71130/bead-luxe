@@ -4,15 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 import { ShoppingBag, Search, Heart, User, Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useWishlistStore } from "@/store/wishlistStore";
-import CartDrawer from "@/components/shop/CartDrawer"; // 1. Back to standard import
+import CartDrawer from "@/components/shop/CartDrawer";
 import SearchModal from "@/components/shop/SearchModal";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false); // 2. The "Hydration Guard"
+  const [hasMounted, setHasMounted] = useState(false);
   const pathname = usePathname();
 
   const items = useCartStore((state) => state.items);
@@ -20,7 +19,6 @@ const Navbar = () => {
   const wishlistItems = useWishlistStore((state) => state.items);
   const wishlistCount = wishlistItems.length;
 
-  // 3. Handle Scroll AND Mounting in one effect
   useEffect(() => {
     setHasMounted(true);
     const handleScroll = () => {
@@ -30,6 +28,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const isShopPage = pathname === "/products";
   const isHomePage = pathname === "/";
 
   return (
@@ -50,7 +49,7 @@ const Navbar = () => {
           BeadLuxe
         </Link>
 
-        {/* Nav Links - Now static and fast! */}
+        {/* Nav Links */}
         <div className="hidden md:flex space-x-8 text-xs uppercase tracking-[0.2em] font-medium text-white/90">
           <Link href="/" className="hover:text-[#C9A84C] transition-colors">
             Home
@@ -74,14 +73,16 @@ const Navbar = () => {
 
         {/* Action Icons */}
         <div className="flex items-center space-x-5 text-white">
-          {/* Search Modal Trigger */}
-          <SearchModal>
-            <button className="outline-none">
-              <Search className="w-5 h-5 cursor-pointer hover:text-[#C9A84C] transition-colors" />
-            </button>
-          </SearchModal>
+          {/* 🔍 CONDITIONAL SEARCH: Only renders if we are on the Shop page */}
+          {isShopPage && (
+            <SearchModal>
+              <button className="outline-none">
+                <Search className="w-5 h-5 cursor-pointer hover:text-[#C9A84C] transition-colors" />
+              </button>
+            </SearchModal>
+          )}
 
-          {/* Wishlist - Guarded by hasMounted */}
+          {/* Wishlist */}
           <Link href="/wishlist" className="relative">
             <Heart className="w-5 h-5 cursor-pointer hover:text-[#C9A84C] transition-colors" />
             {hasMounted && wishlistCount > 0 && (
@@ -91,7 +92,7 @@ const Navbar = () => {
             )}
           </Link>
 
-          {/* Cart Section - Guarded by hasMounted */}
+          {/* Cart Section */}
           {hasMounted ? (
             <CartDrawer>
               <button className="relative outline-none">
@@ -104,13 +105,14 @@ const Navbar = () => {
               </button>
             </CartDrawer>
           ) : (
-            <div className="w-5 h-5" /> // Placeholder while mounting to prevent layout shift
+            <div className="w-5 h-5" />
           )}
 
           <Link href="/account">
             <User className="w-5 h-5 cursor-pointer hover:text-[#C9A84C] transition-colors" />
           </Link>
 
+          {/* Mobile Menu Toggle */}
           <button
             className="md:hidden"
             onClick={() => setIsMobileMenuOpen(true)}
@@ -119,7 +121,35 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-      {/* ... (Mobile Drawer remains the same) */}
+
+      {/* Mobile Drawer (Simplified representation) */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-black z-[60] flex flex-col p-8">
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="self-end mb-8"
+          >
+            <X size={30} />
+          </button>
+          <div className="flex flex-col space-y-6 text-xl uppercase tracking-widest">
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+              Home
+            </Link>
+            <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)}>
+              Shop
+            </Link>
+            <Link
+              href="/collections"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Collections
+            </Link>
+            <Link href="/about" onClick={() => setIsMobileMenuOpen(false)}>
+              About
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

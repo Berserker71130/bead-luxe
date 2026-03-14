@@ -7,7 +7,7 @@ import { Trash2 } from "lucide-react"; // Import the trash icon
 import PageTransition from "@/components/ui/PageTransition";
 
 export default function WishlistPage() {
-  // We pull both 'items' and 'removeItem' from your existing store
+  // Pull both 'items' and 'removeItem' from existing store
   const { items, removeItem } = useWishlistStore();
 
   return (
@@ -43,7 +43,7 @@ export default function WishlistPage() {
                     <Trash2 size={18} />
                   </button>
 
-                  {/* YOUR EXISTING CARD */}
+                  {/*EXISTING CARD */}
                   <ProductCard product={product} />
                 </div>
               ))}
